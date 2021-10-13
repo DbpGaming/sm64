@@ -62,4 +62,7 @@
 // Use cycles instead of microseconds
 //#define PUPPYPRINT_DEBUG_CYCLES
 
+// Enable debug level select
+#define DEBUG_LEVEL_SELECT
+
 #endif // CONFIG_H
