@@ -1362,7 +1362,7 @@ s32 act_air_hit_wall(struct MarioState *m) {
         mario_drop_held_object(m);
     }
 
-    if (++(m->actionTimer) <= 1 && m->input & INPUT_A_PRESSED) {
+    if (++(m->actionTimer) <= 2 && m->input & INPUT_A_PRESSED) {
         m->vel[1] = 52.0f;
         m->faceAngle[1] += 0x8000;
         return set_mario_action(m, ACT_WALL_KICK_AIR, 0);
@@ -1379,7 +1379,10 @@ s32 act_air_hit_wall(struct MarioState *m) {
         return set_mario_action(m, ACT_WALL_SLIDE, 0);
     }
 
-    return set_mario_animation(m, MARIO_ANIM_START_WALLKICK);
+    set_mario_animation(m, MARIO_ANIM_START_WALLKICK);
+    m->marioObj->header.gfx.angle[1] = atan2s(m->wall->normal.z, m->wall->normal.x);
+
+    return FALSE;
 }
 
 s32 act_wall_slide(struct MarioState *m) {
