@@ -1362,7 +1362,7 @@ s32 act_air_hit_wall(struct MarioState *m) {
         mario_drop_held_object(m);
     }
 
-    if (++(m->actionTimer) <= 1 && m->input & INPUT_A_PRESSED) {
+    if (++(m->actionTimer) <= 2 && m->input & INPUT_A_PRESSED) {
         m->vel[1] = 52.0f;
         m->faceAngle[1] += 0x8000;
         return set_mario_action(m, ACT_WALL_KICK_AIR, 0);
@@ -1379,17 +1379,10 @@ s32 act_air_hit_wall(struct MarioState *m) {
         return set_mario_action(m, ACT_WALL_SLIDE, 0);
     }
 
-#ifdef AVOID_UB
-    return
-#endif
     set_mario_animation(m, MARIO_ANIM_START_WALLKICK);
+    m->marioObj->header.gfx.angle[1] = atan2s(m->wall->normal.z, m->wall->normal.x);
 
-    //! Missing return statement. The returned value is the result of the call
-    // to set_mario_animation. In practice, this value is nonzero.
-    // This results in this action "cancelling" into itself. It is supposed to
-    // execute on two frames, but instead it executes twice on the same frame.
-    // This results in firsties only being possible for a single frame, instead
-    // of two.
+    return FALSE;
 }
 
 s32 act_wall_slide(struct MarioState *m) {
