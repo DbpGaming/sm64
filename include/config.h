@@ -61,4 +61,7 @@
 #define BORDER_HEIGHT_EMULATOR 0
 #endif
 
+// skip peach cutscene
+#define SKIP_PEACH
+
 #endif // CONFIG_H
