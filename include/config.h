@@ -9,8 +9,6 @@
 
 // Bug Fixes
 // --| Post-JP Version Nintendo Bug Fixes
-/// Fixes bug where obtaining over 999 coins sets the number of lives to 999 (or -25)
-#define BUGFIX_MAX_LIVES (0 || VERSION_US || VERSION_EU || VERSION_SH)
 /// Fixes bug where the Boss music won't fade out after defeating King Bob-omb
 #define BUGFIX_KING_BOB_OMB_FADE_MUSIC (0 || VERSION_US || VERSION_EU || VERSION_SH)
 /// Fixes bug in Bob-Omb Battlefield where entering a warp stops the Koopa race music
