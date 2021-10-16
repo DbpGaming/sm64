@@ -70,4 +70,7 @@
 // Enable debug level select
 #define DEBUG_LEVEL_SELECT
 
+//non stop stars
+#define NON_STOP
+
 #endif // CONFIG_H
