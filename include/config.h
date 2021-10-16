@@ -71,4 +71,10 @@
 //non stop stars
 #define NON_STOP
 
+//coin star
+#define COIN_STAR
+
+// animated red coin hud
+// #define ANIMATED_RED_COIN_HUD
+
 #endif // CONFIG_H
