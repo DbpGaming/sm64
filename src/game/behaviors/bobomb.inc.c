@@ -83,7 +83,7 @@ void bobomb_act_patrol(void) {
 
 void bobomb_act_chase_mario(void) {
     UNUSED u8 filler[4];
-    s16 animFrame = ++o->header.gfx.animInfo.animFrame; 
+    s16 animFrame = ++o->header.gfx.animInfo.animFrame;
     s16 collisionFlags;
 
     o->oForwardVel = 20.0f;
@@ -336,7 +336,6 @@ void bobomb_buddy_cannon_dialog(s16 dialogFirstText, s16 dialogSecondText) {
         case BOBOMB_BUDDY_CANNON_UNOPENED:
             buddyText = cutscene_object_with_dialog(CUTSCENE_DIALOG, o, dialogFirstText);
             if (buddyText != DIALOG_RESPONSE_NONE) {
-                save_file_set_cannon_unlocked();
                 cannonClosed = cur_obj_nearest_object_with_behavior(bhvCannonClosed);
                 if (cannonClosed != NULL) {
                     o->oBobombBuddyCannonStatus = BOBOMB_BUDDY_CANNON_OPENING;
