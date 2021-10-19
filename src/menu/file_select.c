@@ -109,10 +109,6 @@ static s8 sAllFilesExist = FALSE;
 // Mario A: 1 | Mario B: 2 | Mario C: 3 | Mario D: 4
 static s8 sSelectedFileNum = 0;
 
-// Which coin score mode to use when scoring files. 0 for local
-// coin high score, 1 for high score across all files.
-static s8 sScoreFileCoinScoreMode = 0;
-
 // In EU, if no save file exists, open the language menu so the user can find it.
 #ifdef VERSION_EU
 static s8 sOpenLangSettings = FALSE;
@@ -1626,9 +1622,6 @@ void handle_cursor_button_input(void) {
             sClickPos[0] = sCursorPos[0];
             sClickPos[1] = sCursorPos[1];
             sCursorClickingTimer = 1;
-        } else if (gPlayer3Controller->buttonPressed & A_BUTTON) {
-            sScoreFileCoinScoreMode = 1 - sScoreFileCoinScoreMode;
-            play_sound(SOUND_MENU_CLICK_FILE_SELECT, gGlobalSoundSource);
         }
     } else { // If cursor is clicked
         if (gPlayer3Controller->buttonPressed
@@ -2584,49 +2577,6 @@ void print_score_file_castle_secret_stars(s8 fileIndex, s16 x, s16 y) {
 #endif
 
 /**
- * Prints course coins collected in a score menu save file.
- */
-void print_score_file_course_coin_score(s8 fileIndex, s16 courseIndex, s16 x, s16 y) {
-    unsigned char coinScoreText[20];
-    u8 stars = save_file_get_star_flags(fileIndex, courseIndex);
-    unsigned char textCoinX[] = { TEXT_COIN_X };
-    unsigned char textStar[] = { TEXT_STAR };
-#if defined(VERSION_JP) || defined(VERSION_SH)
-    #define LENGTH 5
-#else
-    #define LENGTH 8
-#endif
-    unsigned char fileNames[][LENGTH] = {
-        { TEXT_4DASHES }, // huh?
-        { TEXT_SCORE_MARIO_A }, { TEXT_SCORE_MARIO_B }, { TEXT_SCORE_MARIO_C }, { TEXT_SCORE_MARIO_D },
-    };
-#undef LENGTH
-    // MYSCORE
-    if (sScoreFileCoinScoreMode == 0) {
-        // Print "[coin] x"
-        print_menu_generic_string(x + 25, y, textCoinX);
-        // Print coin score
-        int_to_str(save_file_get_course_coin_score(fileIndex, courseIndex), coinScoreText);
-        print_menu_generic_string(x + 41, y, coinScoreText);
-        // If collected, print 100 coin star
-        if (stars & (1 << 6)) {
-            print_menu_generic_string(x + 70, y, textStar);
-        }
-    }
-    // HISCORE
-    else {
-        // Print "[coin] x"
-        print_menu_generic_string(x + HISCORE_COIN_ICON_X, y, textCoinX);
-        // Print coin highscore
-        int_to_str((u16) save_file_get_max_coin_score(courseIndex) & 0xFFFF, coinScoreText);
-        print_menu_generic_string(x + HISCORE_COIN_TEXT_X, y, coinScoreText);
-        // Print coin highscore file
-        print_menu_generic_string(x + HISCORE_COIN_NAMES_X, y,
-                         fileNames[(save_file_get_max_coin_score(courseIndex) >> 16) & 0xFFFF]);
-    }
-}
-
-/**
  * Prints stars collected in a score menu save file.
  */
 void print_score_file_star_score(s8 fileIndex, s16 courseIndex, s16 x, s16 y) {
@@ -2733,8 +2683,7 @@ void print_save_file_scores(s8 fileIndex) {
 #define PRINT_COURSE_SCORES(courseIndex, pad) \
     print_menu_generic_string(LEVEL_NAME_X + (pad * LEVEL_NUM_PAD), 23 + 12 * courseIndex, \
                               segmented_to_virtual(levelNameTable[courseIndex - 1])); \
-    print_score_file_star_score(fileIndex, courseIndex - 1, STAR_SCORE_X, 23 + 12 * courseIndex); \
-    print_score_file_course_coin_score(fileIndex, courseIndex - 1, 213, 23 + 12 * courseIndex);
+    print_score_file_star_score(fileIndex, courseIndex - 1, STAR_SCORE_X, 23 + 12 * courseIndex);
 
     // Course values are indexed, from Bob-omb Battlefield to Rainbow Ride
     PRINT_COURSE_SCORES(COURSE_BOB, 1)
@@ -2760,13 +2709,6 @@ void print_save_file_scores(s8 fileIndex) {
     // Print castle secret stars score
     print_score_file_castle_secret_stars(fileIndex, STAR_SCORE_X, 23 + 12 * 16);
 
-    // Print current coin score mode
-    if (sScoreFileCoinScoreMode == 0) {
-        print_menu_generic_string(MYSCORE_X, 24, LANGUAGE_ARRAY(textMyScore));
-    } else {
-        print_menu_generic_string(HISCORE_X, 24, LANGUAGE_ARRAY(textHiScore));
-    }
-
     gSPDisplayList(gDisplayListHead++, dl_menu_ia8_text_end);
 }
 
@@ -2789,7 +2731,6 @@ static void print_file_select_strings(void) {
             break;
         case MENU_BUTTON_SCORE:
             print_score_menu_strings();
-            sScoreFileCoinScoreMode = 0;
             break;
         case MENU_BUTTON_COPY:
             print_copy_menu_strings();

@@ -822,25 +822,7 @@ s16 get_string_width(u8 *str) {
 u8 gHudSymCoin[] = { GLYPH_COIN, GLYPH_SPACE };
 u8 gHudSymX[] = { GLYPH_MULTIPLY, GLYPH_SPACE };
 
-void print_hud_my_score_coins(s32 useCourseCoinScore, s8 fileIndex, s8 courseIndex, s16 x, s16 y) {
-    u8 strNumCoins[4];
-    s16 numCoins;
-
-    if (!useCourseCoinScore) {
-        numCoins = (u16)(save_file_get_max_coin_score(courseIndex) & 0xFFFF);
-    } else {
-        numCoins = save_file_get_course_coin_score(fileIndex, courseIndex);
-    }
-
-    if (numCoins != 0) {
-        print_hud_lut_string(HUD_LUT_GLOBAL, x, y, gHudSymCoin);
-        print_hud_lut_string(HUD_LUT_GLOBAL, x + 16, y, gHudSymX);
-        int_to_str(numCoins, strNumCoins);
-        print_hud_lut_string(HUD_LUT_GLOBAL, x + 32, y, strNumCoins);
-    }
-}
-
-void print_hud_my_score_stars(s8 fileIndex, s8 courseIndex, s16 x, s16 y) {
+void print_hud_my_score_stars(s8 fileNum, s8 courseNum, s16 x, s16 y) {
     u8 strStarCount[4];
     s16 starCount;
     u8 textSymStar[] = { GLYPH_STAR, GLYPH_SPACE };
@@ -2246,17 +2228,9 @@ u8 gTextCourse[][7] = {
     #define MYSCORE_X         62
 #endif
 
-void render_pause_my_score_coins(void) {
-#ifdef VERSION_EU
-    u8 textMyScore[][10] = {
-        { TEXT_MY_SCORE },
-        { TEXT_MY_SCORE_FR },
-        { TEXT_MY_SCORE_DE }
-    };
-#else
+/*void render_pause_course(void) {
     u8 textCourse[] = { TEXT_COURSE };
     u8 textMyScore[] = { TEXT_MY_SCORE };
-#endif
     u8 textStar[] = { TEXT_STAR };
     u8 textUnfilledStar[] = { TEXT_UNFILLED_STAR };
 
@@ -2268,36 +2242,13 @@ void render_pause_my_score_coins(void) {
     u8 courseIndex;
     u8 starFlags;
 
-#ifndef VERSION_EU
-    courseNameTbl = segmented_to_virtual(seg2_course_name_table);
-    actNameTbl = segmented_to_virtual(seg2_act_name_table);
-#endif
-
-    courseIndex = COURSE_NUM_TO_INDEX(gCurrCourseNum);
-    starFlags = save_file_get_star_flags(gCurrSaveFileNum - 1, COURSE_NUM_TO_INDEX(gCurrCourseNum));
-
-#ifdef VERSION_EU
-    switch (gInGameLanguage) {
-        case LANGUAGE_ENGLISH:
-            actNameTbl = segmented_to_virtual(act_name_table_eu_en);
-            courseNameTbl = segmented_to_virtual(course_name_table_eu_en);
-            break;
-        case LANGUAGE_FRENCH:
-            actNameTbl = segmented_to_virtual(act_name_table_eu_fr);
-            courseNameTbl = segmented_to_virtual(course_name_table_eu_fr);
-            break;
-        case LANGUAGE_GERMAN:
-            actNameTbl = segmented_to_virtual(act_name_table_eu_de);
-            courseNameTbl = segmented_to_virtual(course_name_table_eu_de);
-            break;
-    }
-#endif
+    courseIndex = gCurrCourseNum - 1;
+    starFlags = save_file_get_star_flags(gCurrSaveFileNum - 1, gCurrCourseNum - 1);
 
     gSPDisplayList(gDisplayListHead++, dl_rgba16_text_begin);
     gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, gDialogTextAlpha);
 
-    if (courseIndex <= COURSE_NUM_TO_INDEX(COURSE_STAGES_MAX)) {
-        print_hud_my_score_coins(1, gCurrSaveFileNum - 1, courseIndex, 178, 103);
+    if (courseIndex < COURSE_STAGES_COUNT) {
         print_hud_my_score_stars(gCurrSaveFileNum - 1, courseIndex, 118, 103);
     }
 
@@ -2313,12 +2264,11 @@ void render_pause_my_score_coins(void) {
 
     courseName = segmented_to_virtual(courseNameTbl[courseIndex]);
 
-    if (courseIndex <= COURSE_NUM_TO_INDEX(COURSE_STAGES_MAX)) {
-        print_generic_string(TXT_COURSE_X, 157, LANGUAGE_ARRAY(textCourse));
+    if (courseIndex < COURSE_STAGES_COUNT) {
+        print_generic_string(63, 157, textCourse);
         int_to_str(gCurrCourseNum, strCourseNum);
         print_generic_string(CRS_NUM_X1, 157, strCourseNum);
-
-        actName = segmented_to_virtual(actNameTbl[COURSE_NUM_TO_INDEX(gCurrCourseNum) * 6 + gDialogCourseActNum - 1]);
+        actName = segmented_to_virtual(actNameTbl[(gCurrCourseNum - 1) * 6 + gDialogCourseActNum - 1]);
 
         if (starFlags & (1 << (gDialogCourseActNum - 1))) {
             print_generic_string(TXT_STAR_X, 140, textStar);
@@ -2327,19 +2277,13 @@ void render_pause_my_score_coins(void) {
         }
 
         print_generic_string(ACT_NAME_X, 140, actName);
-#ifndef VERSION_JP
         print_generic_string(LVL_NAME_X, 157, &courseName[3]);
-    } else {
-        print_generic_string(SECRET_LVL_NAME_X, 157, &courseName[3]);
-#endif
     }
-
-#ifdef VERSION_JP
-    print_generic_string(LVL_NAME_X, 157, &courseName[3]);
-#endif
-
+    else {
+        print_generic_string(94, 157, &courseName[3]);
+    }
     gSPDisplayList(gDisplayListHead++, dl_ia_text_end);
-}
+}*/
 
 #if defined(VERSION_JP) || defined(VERSION_SH)
     #define TXT1_X 4
@@ -2615,7 +2559,6 @@ void render_pause_castle_main_strings(s16 x, s16 y) {
 #ifdef VERSION_EU
         print_generic_string(x + 44, y - 5, textX);
 #endif
-        int_to_str(save_file_get_course_coin_score(gCurrSaveFileNum - 1, gDialogLineNum), strVal);
         print_generic_string(x + 54, y - 5, strVal);
 #ifdef VERSION_EU
         print_generic_string(x - 17, y + 30, courseName);
@@ -2668,7 +2611,7 @@ s16 render_pause_courses_and_castle(void) {
 
         case DIALOG_STATE_VERTICAL:
             shade_screen();
-            render_pause_my_score_coins();
+            //render_pause_course();
 			render_pause_course_options(99, 93, &gDialogLineNum, 15);
 
 #ifdef VERSION_EU
@@ -2763,17 +2706,6 @@ void print_hud_course_complete_string(s8 str) {
 #endif
 
     u8 colorFade = sins(gDialogColorFadeTimer) * 50.0f + 200.0f;
-
-    gSPDisplayList(gDisplayListHead++, dl_rgba16_text_begin);
-    gDPSetEnvColor(gDisplayListHead++, colorFade, colorFade, colorFade, 255);
-
-    if (str == HUD_PRINT_HISCORE) {
-        print_hud_lut_string(HUD_LUT_GLOBAL, TXT_HISCORE_X, TXT_HISCORE_Y, LANGUAGE_ARRAY(textHiScore));
-    } else { // HUD_PRINT_CONGRATULATIONS
-        print_hud_lut_string(HUD_LUT_GLOBAL, TXT_CONGRATS_X, 67, LANGUAGE_ARRAY(textCongratulations));
-    }
-
-    gSPDisplayList(gDisplayListHead++, dl_rgba16_text_end);
 }
 
 void print_hud_course_complete_coins(s16 x, s16 y) {
@@ -2796,9 +2728,6 @@ void print_hud_course_complete_coins(s16 x, s16 y) {
         gCourseCompleteCoinsEqual = TRUE;
         gCourseCompleteCoins = gHudDisplay.coins;
 
-        if (gGotFileCoinHiScore) {
-            print_hud_course_complete_string(HUD_PRINT_HISCORE);
-        }
     } else {
         if ((gCourseDoneMenuTimer & 1) || gHudDisplay.coins > 70) {
             gCourseCompleteCoins++;
@@ -2808,10 +2737,6 @@ void print_hud_course_complete_coins(s16 x, s16 y) {
                 play_sound(SOUND_GENERAL_COLLECT_1UP, gGlobalSoundSource);
                 gMarioState->numLives++;
             }
-        }
-
-        if (gHudDisplay.coins == gCourseCompleteCoins && gGotFileCoinHiScore) {
-            play_sound(SOUND_MENU_MARIO_CASTLE_WARP2, gGlobalSoundSource);
         }
     }
 }

@@ -31,8 +31,6 @@ s8 gSaveFileModified;
 
 u8 gLastCompletedCourseNum = COURSE_NONE;
 u8 gLastCompletedStarNum = 0;
-s8 sUnusedGotGlobalCoinHiScore = FALSE;
-u8 gGotFileCoinHiScore = FALSE;
 u8 gCurrCourseStarFlags = 0;
 
 u8 gSpecialTripleJump = FALSE;
@@ -236,56 +234,8 @@ static void save_main_menu_data(void) {
 static void wipe_main_menu_data(void) {
     bzero(&gSaveBuffer.menuData[0], sizeof(gSaveBuffer.menuData[0]));
 
-    // Set score ages for all courses to 3, 2, 1, and 0, respectively.
-    gSaveBuffer.menuData[0].coinScoreAges[0] = 0x3FFFFFFF;
-    gSaveBuffer.menuData[0].coinScoreAges[1] = 0x2AAAAAAA;
-    gSaveBuffer.menuData[0].coinScoreAges[2] = 0x15555555;
-
     gMainMenuDataModified = TRUE;
     save_main_menu_data();
-}
-
-static s32 get_coin_score_age(s32 fileIndex, s32 courseIndex) {
-    return (gSaveBuffer.menuData[0].coinScoreAges[fileIndex] >> (2 * courseIndex)) & 0x3;
-}
-
-static void set_coin_score_age(s32 fileIndex, s32 courseIndex, s32 age) {
-    s32 mask = 0x3 << (2 * courseIndex);
-
-    gSaveBuffer.menuData[0].coinScoreAges[fileIndex] &= ~mask;
-    gSaveBuffer.menuData[0].coinScoreAges[fileIndex] |= age << (2 * courseIndex);
-}
-
-/**
- * Mark a coin score for a save file as the newest out of all save files.
- */
-static void touch_coin_score_age(s32 fileIndex, s32 courseIndex) {
-    s32 i;
-    u32 age;
-    u32 currentAge = get_coin_score_age(fileIndex, courseIndex);
-
-    if (currentAge != 0) {
-        for (i = 0; i < NUM_SAVE_FILES; i++) {
-            age = get_coin_score_age(i, courseIndex);
-            if (age < currentAge) {
-                set_coin_score_age(i, courseIndex, age + 1);
-            }
-        }
-
-        set_coin_score_age(fileIndex, courseIndex, 0);
-        gMainMenuDataModified = TRUE;
-    }
-}
-
-/**
- * Mark all coin scores for a save file as new.
- */
-static void touch_high_score_ages(s32 fileIndex) {
-    s32 i;
-
-    for (i = COURSE_NUM_TO_INDEX(COURSE_MIN); i <= COURSE_NUM_TO_INDEX(COURSE_STAGES_MAX); i++) {
-        touch_coin_score_age(fileIndex, i);
-    }
 }
 
 /**
@@ -327,7 +277,6 @@ void save_file_do_save(s32 fileIndex) {
 }
 
 void save_file_erase(s32 fileIndex) {
-    touch_high_score_ages(fileIndex);
     bzero(&gSaveBuffer.files[fileIndex][0], sizeof(gSaveBuffer.files[fileIndex][0]));
 
     gSaveFileModified = TRUE;
@@ -338,7 +287,6 @@ void save_file_erase(s32 fileIndex) {
 BAD_RETURN(s32) save_file_copy(s32 srcFileIndex, s32 destFileIndex) {
     UNUSED u8 filler[4];
 
-    touch_high_score_ages(destFileIndex);
     bcopy(&gSaveBuffer.files[srcFileIndex][0], &gSaveBuffer.files[destFileIndex][0],
           sizeof(gSaveBuffer.files[destFileIndex][0]));
 
@@ -408,9 +356,8 @@ void save_file_reload(void) {
 
 /**
  * Update the current save file after collecting a star or a key.
- * If coin score is greater than the current high score, update it.
  */
-void save_file_collect_star_or_key(s16 coinScore, s16 starIndex) {
+void save_file_collect_star_or_key(s16 starIndex) {
     s32 fileIndex = gCurrSaveFileNum - 1;
     s32 courseIndex = COURSE_NUM_TO_INDEX(gCurrCourseNum);
 
@@ -419,26 +366,6 @@ void save_file_collect_star_or_key(s16 coinScore, s16 starIndex) {
 
     gLastCompletedCourseNum = courseIndex + 1;
     gLastCompletedStarNum = starIndex + 1;
-    sUnusedGotGlobalCoinHiScore = FALSE;
-    gGotFileCoinHiScore = FALSE;
-
-    if (courseIndex >= COURSE_NUM_TO_INDEX(COURSE_MIN)
-        && courseIndex <= COURSE_NUM_TO_INDEX(COURSE_STAGES_MAX)) {
-        //! Compares the coin score as a 16 bit value, but only writes the 8 bit
-        // truncation. This can allow a high score to decrease.
-
-        if (coinScore > ((u16) save_file_get_max_coin_score(courseIndex) & 0xFFFF)) {
-            sUnusedGotGlobalCoinHiScore = TRUE;
-        }
-
-        if (coinScore > save_file_get_course_coin_score(fileIndex, courseIndex)) {
-            gSaveBuffer.files[fileIndex][0].courseCoinScores[courseIndex] = coinScore;
-            touch_coin_score_age(fileIndex, courseIndex);
-
-            gGotFileCoinHiScore = TRUE;
-            gSaveFileModified = TRUE;
-        }
-    }
 
     switch (gCurrLevelNum) {
         case LEVEL_BOWSER_1:
@@ -466,32 +393,6 @@ void save_file_collect_star_or_key(s16 coinScore, s16 starIndex) {
 
 s32 save_file_exists(s32 fileIndex) {
     return (gSaveBuffer.files[fileIndex][0].flags & SAVE_FLAG_FILE_EXISTS) != 0;
-}
-
-/**
- * Get the maximum coin score across all files for a course. The lower 16 bits
- * of the returned value are the score, and the upper 16 bits are the file number
- * of the save file with this score.
- */
-u32 save_file_get_max_coin_score(s32 courseIndex) {
-    s32 fileIndex;
-    s32 maxCoinScore = -1;
-    s32 maxScoreAge = -1;
-    s32 maxScoreFileNum = 0;
-
-    for (fileIndex = 0; fileIndex < NUM_SAVE_FILES; fileIndex++) {
-        if (save_file_get_star_flags(fileIndex, courseIndex) != 0) {
-            s32 coinScore = save_file_get_course_coin_score(fileIndex, courseIndex);
-            s32 scoreAge = get_coin_score_age(fileIndex, courseIndex);
-
-            if (coinScore > maxCoinScore || (coinScore == maxCoinScore && scoreAge > maxScoreAge)) {
-                maxCoinScore = coinScore;
-                maxScoreAge = scoreAge;
-                maxScoreFileNum = fileIndex + 1;
-            }
-        }
-    }
-    return (maxScoreFileNum << 16) + max(maxCoinScore, 0);
 }
 
 s32 save_file_get_course_star_count(s32 fileIndex, s32 courseIndex) {
@@ -567,10 +468,6 @@ void save_file_set_star_flags(s32 fileIndex, s32 courseIndex, u32 starFlags) {
 
     gSaveBuffer.files[fileIndex][0].flags |= SAVE_FLAG_FILE_EXISTS;
     gSaveFileModified = TRUE;
-}
-
-s32 save_file_get_course_coin_score(s32 fileIndex, s32 courseIndex) {
-    return gSaveBuffer.files[fileIndex][0].courseCoinScores[courseIndex];
 }
 
 void save_file_set_cap_pos(s16 x, s16 y, s16 z) {
