@@ -350,17 +350,9 @@ void print_act_selector_strings(void) {
     }
 
     gSPDisplayList(gDisplayListHead++, dl_menu_ia8_text_end);
- }
+}
 
-/**
- * Geo function that Print act selector strings.
- *!@bug: This geo function is missing the third param. Harmless in practice due to o32 convention.
- */
-#ifdef AVOID_UB
 Gfx *geo_act_selector_strings(s16 callContext, UNUSED struct GraphNode *node, UNUSED void *context) {
-#else
-Gfx *geo_act_selector_strings(s16 callContext, UNUSED struct GraphNode *node) {
-#endif
     if (callContext == GEO_CONTEXT_RENDER) {
         print_act_selector_strings();
     }
@@ -385,11 +377,7 @@ s32 lvl_init_act_selector_values_and_stars(UNUSED s32 arg, UNUSED s32 unused) {
     if (stars & (1 << 6)) {
         sObtainedStars--;
     }
-
-    //! no return value
-#ifdef AVOID_UB
     return 0;
-#endif
 }
 
 /**

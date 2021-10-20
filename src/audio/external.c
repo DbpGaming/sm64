@@ -1091,14 +1091,7 @@ static void select_current_sounds(u8 bank) {
                                       & (SOUND_DISCRETE | SOUNDARGS_MASK_STATUS);
                 if (isDiscreteAndStatus >= (SOUND_DISCRETE | SOUND_STATUS_PLAYING)
                     && sSoundBanks[bank][sCurrentSound[bank][i]].soundStatus != SOUND_STATUS_STOPPED) {
-//! @bug On JP, if a discrete sound that lowers the background music is
-//  interrupted in this way, it will keep the background music low afterward.
-//  There are only a few of these sounds, and it probably isn't possible to do
-//  it in practice without using a time stop glitch like triple star spawn.
-#ifndef VERSION_JP
                     update_background_music_after_sound(bank, sCurrentSound[bank][i]);
-#endif
-
                     sSoundBanks[bank][sCurrentSound[bank][i]].soundBits = NO_SOUND;
                     sSoundBanks[bank][sCurrentSound[bank][i]].soundStatus = SOUND_STATUS_STOPPED;
                     delete_sound_from_bank(bank, sCurrentSound[bank][i]);
@@ -1232,13 +1225,7 @@ static f32 get_sound_volume(u8 bank, u8 soundIndex, f32 volumeRange) {
 #endif
 
         if (sSoundBanks[bank][soundIndex].soundBits & SOUND_VIBRATO) {
-#ifdef VERSION_JP
-            //! @bug Intensity is 0 when the sound is far away. Due to the subtraction below, it is possible to end up with a negative intensity.
-            // When it is, objects with a volumeRange of 1 can still occasionally be lightly heard.
-            if (intensity != 0.0)
-#else
             if (intensity >= 0.08f)
-#endif
             {
                 intensity -= (f32)(gAudioRandom & 0xf) / US_FLOAT(192.0);
             }
@@ -1513,22 +1500,6 @@ static void update_game_sound(void) {
                             break;
                     }
                 }
-#ifdef VERSION_JP
-                // If the sound was marked for deletion (bits set to NO_SOUND), then stop playing it
-                // and delete it
-                // @bug (JP double red coin sound) If the sound finished within the same frame as
-                // being marked for deletion, the signal to stop playing will be interpreted as a
-                // signal to *start* playing, as .main_loop_023589 in 00_sound_player does not check
-                // for soundScriptIO[0] being zero. This happens most commonly for red coin sounds
-                // whose sound spawners deactivate 30 frames after the sound starts to play, while
-                // the sound itself runs for 1.20 seconds. With enough lag these may coincide.
-                // Fixed on US by checking that layer0->finished is FALSE.
-                else if (soundStatus == SOUND_STATUS_STOPPED) {
-                    update_background_music_after_sound(bank, soundIndex);
-                    gSequencePlayers[SEQ_PLAYER_SFX].channels[channelIndex]->soundScriptIO[0] = 0;
-                    delete_sound_from_bank(bank, soundIndex);
-                }
-#else
                 else if (gSequencePlayers[SEQ_PLAYER_SFX].channels[channelIndex]->layers[0] == NULL) {
                     update_background_music_after_sound(bank, soundIndex);
                     sSoundBanks[bank][soundIndex].soundStatus = SOUND_STATUS_STOPPED;
@@ -1540,7 +1511,6 @@ static void update_game_sound(void) {
                     gSequencePlayers[SEQ_PLAYER_SFX].channels[channelIndex]->soundScriptIO[0] = 0;
                     delete_sound_from_bank(bank, soundIndex);
                 }
-#endif
                 // If sound has finished playing, then delete it
                 // @bug (JP sound glitch) On JP, ...->layers[0] has not been checked for null,
                 // so this access can crash if an earlier layer allocation failed due to too

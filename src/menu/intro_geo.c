@@ -437,10 +437,8 @@ Gfx *geo_intro_rumble_pak_graphic(s32 state, struct GraphNode *node, UNUSED void
     Gfx *dl;
     s32 introContext;
     s8 backgroundTileSix;
-#ifdef AVOID_UB
     dl = NULL;
     backgroundTileSix = 0;
-#endif
 
     if (state != 1) {
         dl = NULL;

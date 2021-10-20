@@ -491,10 +491,10 @@ extern u32 gISVFlag;
 void osInitialize_fakeisv() {
     /* global flag to skip `__checkHardware_isv` from being called. */
     gISVFlag = 0x49533634;  // 'IS64'
- 
+
     /* printf writes go to this address, cen64(1) has this hardcoded. */
     gISVDbgPrnAdrs = 0x13FF0000;
- 
+
     /* `__printfunc`, used by `osSyncPrintf` will be set. */
     __osInitialize_isv();
 }

@@ -54,9 +54,7 @@ void adjust_rolling_face_pitch(f32 f12) {
 void snowmans_bottom_act_1(void) {
     UNUSED s16 collisionFlags;
     s32 followStatus;
-#ifdef AVOID_UB
     followStatus = 0;
-#endif
 
     o->oPathedStartWaypoint = segmented_to_virtual(&ccm_seg7_trajectory_snowman);
     collisionFlags = object_step_without_floor_orient();
