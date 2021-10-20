@@ -200,39 +200,20 @@ static void add_save_block_signature(void *buffer, s32 size, u16 magic) {
     sig->chksum = calc_checksum(buffer, size);
 }
 
-/**
- * Copy main menu data from one backup slot to the other slot.
- */
-static void restore_main_menu_data(s32 srcSlot) {
-    s32 destSlot = srcSlot ^ 1;
-
-    // Compute checksum on source data
-    add_save_block_signature(&gSaveBuffer.menuData[srcSlot], sizeof(gSaveBuffer.menuData[srcSlot]), MENU_DATA_MAGIC);
-
-    // Copy source data to destination
-    bcopy(&gSaveBuffer.menuData[srcSlot], &gSaveBuffer.menuData[destSlot], sizeof(gSaveBuffer.menuData[destSlot]));
-
-    // Write destination data to EEPROM
-    write_eeprom_data(&gSaveBuffer.menuData[destSlot], sizeof(gSaveBuffer.menuData[destSlot]));
-}
-
 static void save_main_menu_data(void) {
     if (gMainMenuDataModified) {
         // Compute checksum
-        add_save_block_signature(&gSaveBuffer.menuData[0], sizeof(gSaveBuffer.menuData[0]), MENU_DATA_MAGIC);
-
-        // Back up data
-        bcopy(&gSaveBuffer.menuData[0], &gSaveBuffer.menuData[1], sizeof(gSaveBuffer.menuData[1]));
+        add_save_block_signature(&gSaveBuffer.menuData, sizeof(gSaveBuffer.menuData), MENU_DATA_MAGIC);
 
         // Write to EEPROM
-        write_eeprom_data(gSaveBuffer.menuData, sizeof(gSaveBuffer.menuData));
+        write_eeprom_data(&gSaveBuffer.menuData, sizeof(gSaveBuffer.menuData));
 
         gMainMenuDataModified = FALSE;
     }
 }
 
 static void wipe_main_menu_data(void) {
-    bzero(&gSaveBuffer.menuData[0], sizeof(gSaveBuffer.menuData[0]));
+    bzero(&gSaveBuffer.menuData, sizeof(gSaveBuffer.menuData));
 
     gMainMenuDataModified = TRUE;
     save_main_menu_data();
@@ -305,7 +286,7 @@ void save_file_load_all(void) {
     read_eeprom_data(&gSaveBuffer, sizeof(gSaveBuffer));
 
     // Verify the main menu data and create a backup copy if only one of the slots is valid.
-    validSlots = verify_save_block_signature(&gSaveBuffer.menuData[0], sizeof(gSaveBuffer.menuData[0]), MENU_DATA_MAGIC);
+    /*validSlots = verify_save_block_signature(&gSaveBuffer.menuData, sizeof(gSaveBuffer.menuData), MENU_DATA_MAGIC);
     validSlots |= verify_save_block_signature(&gSaveBuffer.menuData[1], sizeof(gSaveBuffer.menuData[1]),MENU_DATA_MAGIC) << 1;
     switch (validSlots) {
         case 0: // Neither copy is correct
@@ -317,7 +298,7 @@ void save_file_load_all(void) {
         case 2: // Slot 1 is correct and slot 0 is incorrect
             restore_main_menu_data(1);
             break;
-    }
+    }*/
 
     for (file = 0; file < NUM_SAVE_FILES; file++) {
         // Verify the save file and create a backup copy if only one of the slots is valid.
@@ -346,9 +327,6 @@ void save_file_reload(void) {
     // Copy save file data from backup
     bcopy(&gSaveBuffer.files[gCurrSaveFileNum - 1][1], &gSaveBuffer.files[gCurrSaveFileNum - 1][0],
           sizeof(gSaveBuffer.files[gCurrSaveFileNum - 1][0]));
-
-    // Copy main menu data from backup
-    bcopy(&gSaveBuffer.menuData[1], &gSaveBuffer.menuData[0], sizeof(gSaveBuffer.menuData[0]));
 
     gMainMenuDataModified = FALSE;
     gSaveFileModified = FALSE;
@@ -493,24 +471,24 @@ s32 save_file_get_cap_pos(Vec3s capPos) {
 
 void save_file_set_sound_mode(u16 mode) {
     set_sound_mode(mode);
-    gSaveBuffer.menuData[0].soundMode = mode;
+    gSaveBuffer.menuData.soundMode = mode;
 
     gMainMenuDataModified = TRUE;
     save_main_menu_data();
 }
 
 void save_file_set_camera_speed(u8 speed) {
-    gSaveBuffer.menuData[0].cameraSpeedSetting = speed;
+    gSaveBuffer.menuData.cameraSpeedSetting = speed;
     gMainMenuDataModified = TRUE;
     save_main_menu_data();
 }
 
 u16 save_file_get_sound_mode(void) {
-    return gSaveBuffer.menuData[0].soundMode;
+    return gSaveBuffer.menuData.soundMode;
 }
 
 u8 save_file_get_camera_speed(void) {
-    return gSaveBuffer.menuData[0].cameraSpeedSetting;
+    return gSaveBuffer.menuData.cameraSpeedSetting;
 }
 
 void save_file_move_cap_to_default_location(void) {
@@ -532,13 +510,13 @@ void save_file_move_cap_to_default_location(void) {
 
 #ifdef VERSION_EU
 void eu_set_language(u16 language) {
-    gSaveBuffer.menuData[0].language = language;
+    gSaveBuffer.menuData.language = language;
     gMainMenuDataModified = TRUE;
     save_main_menu_data();
 }
 
 u16 eu_get_language(void) {
-    return gSaveBuffer.menuData[0].language;
+    return gSaveBuffer.menuData.language;
 }
 #endif
 
