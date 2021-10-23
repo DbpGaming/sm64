@@ -61,6 +61,9 @@
 #define BORDER_HEIGHT_EMULATOR 0
 #endif
 
+//texture filtering
+//#define FILTERING
+
 // skip peach cutscene
 #define SKIP_PEACH
 

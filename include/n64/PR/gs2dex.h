@@ -346,7 +346,7 @@ typedef	struct	{
  *	Render Mode Macro
  *===========================================================================*/
 #define RM_RA_SPRITE(clk)                                      \
-        AA_EN | CVG_DST_CLAMP |                                \
+        CVG_DST_CLAMP |                                \
         CVG_X_ALPHA | ALPHA_CVG_SEL | ZMODE_OPA | TEX_EDGE |   \
         GBL_c##clk(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA)
 
