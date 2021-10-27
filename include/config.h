@@ -43,15 +43,19 @@
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
 
+// Save size
+//   eep4k - uses EEPROM 4kbit
+//   eep16k - uses EEPROM 16kbit (There aren't any differences in syntax, but this is provided just in case)
+//   sram - uses SRAM 256Kbit
+#define EEP (0 || EEP4K || EEP16K)
+#define EEP16K 1
+//#define EEP4K 1
+//#define SRAM 1
+
 // Border Height Define for NTSC Versions
 #ifdef TARGET_N64
-#ifndef VERSION_EU
 #define BORDER_HEIGHT_CONSOLE 8
 #define BORDER_HEIGHT_EMULATOR 0
-#else
-#define BORDER_HEIGHT_CONSOLE 1
-#define BORDER_HEIGHT_EMULATOR 0
-#endif
 #else
 #define BORDER_HEIGHT_CONSOLE 0
 #define BORDER_HEIGHT_EMULATOR 0
