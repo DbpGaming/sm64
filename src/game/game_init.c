@@ -48,6 +48,14 @@ s8 gEepromProbe;
 #ifdef SRAM
 s8 gSramProbe;
 #endif
+u8 gCameraSpeed = 2;
+
+u8 gWaterCamOverride;
+u8 gFlyingCamOverride;
+u8 gKeepCliffCam;
+s32 gCliffTimer;
+
+// OS Messages
 OSMesgQueue gGameVblankQueue;
 OSMesgQueue gGfxVblankQueue;
 OSMesg gGameMesgBuf[1];
@@ -282,7 +290,7 @@ void create_gfx_task_structure(void) {
     gGfxSPTask->task.t.ucode_data = gspF3DEX_fifoDataStart;
 #elif   SUPER3D_GBI
     gGfxSPTask->task.t.ucode = gspSuper3D_fifoTextStart;
-    gGfxSPTask->task.t.ucode_data = gspSuper3D_fifoDataStart; 
+    gGfxSPTask->task.t.ucode_data = gspSuper3D_fifoDataStart;
 #else
     gGfxSPTask->task.t.ucode = gspFast3D_fifoTextStart;
     gGfxSPTask->task.t.ucode_data = gspFast3D_fifoDataStart;
@@ -366,7 +374,7 @@ void render_init(void) {
     } else {
         gIsConsole = 1;
         gBorderHeight = BORDER_HEIGHT_CONSOLE;
-    }    
+    }
     gGfxPool = &gGfxPools[0];
     set_segment_base_addr(1, gGfxPool->buffer);
     gGfxSPTask = &gGfxPool->spTask;

@@ -25,6 +25,12 @@
 #define TEXT_PAUSE _("PAUSE") // Pause text, Castle Courses
 #define TEXT_HUD_CONGRATULATIONS _("CONGRATULATIONS") // Course Complete Text, Bowser Courses
 
+#define TEXT_CAM_INFO_SLOWEST _("CAM SPEED: SLOWEST")
+#define TEXT_CAM_INFO_SLOW _("CAM SPEED: SLOW")
+#define TEXT_CAM_INFO_MEDIUM _("CAM SPEED: MEDIUM")
+#define TEXT_CAM_INFO_FAST _("CAM SPEED: FAST")
+#define TEXT_CAM_INFO_FASTEST _("CAM SPEED: FASTEST")
+
 #if defined(VERSION_JP) || defined(VERSION_SH)
 
 /**

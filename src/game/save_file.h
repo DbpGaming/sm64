@@ -63,6 +63,7 @@ struct MainMenuSaveData {
 #else
 #define SUBTRAHEND 6
 #endif
+    u8 cameraSpeedSetting: 3;
 
     // Pad to match the EEPROM size of 0x200 (10 bytes on JP/US, 8 bytes on EU)
     //u8 filler[EEPROM_SIZE / 2 - SUBTRAHEND - NUM_SAVE_FILES * (4 + sizeof(struct SaveFile))];
@@ -157,6 +158,8 @@ s32 save_file_get_cap_pos(Vec3s capPos);
 void save_file_set_sound_mode(u16 mode);
 u16 save_file_get_sound_mode(void);
 void save_file_move_cap_to_default_location(void);
+u8 save_file_get_camera_speed(void);
+void save_file_set_camera_speed(u8 speed);
 
 void disable_warp_checkpoint(void);
 void check_if_should_set_warp_checkpoint(struct WarpNode *warpNode);

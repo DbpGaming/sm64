@@ -42,6 +42,10 @@ extern struct GfxPool *gGfxPool;
 extern u8 gControllerBits;
 extern u8 gIsConsole;
 extern u8 gBorderHeight;
+extern u8 gCameraSpeed;
+extern u8 gWaterCamOverride;
+extern u8 gFlyingCamOverride;
+extern u8 gKeepCliffCam;
 #ifdef EEP
 extern s8 gEepromProbe;
 #endif

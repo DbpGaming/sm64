@@ -40,6 +40,12 @@ s16 gCutsceneMsgXOffset;
 s16 gCutsceneMsgYOffset;
 s8 gRedCoinsCollected;
 
+u8 textCamInfoSlowest[] = { TEXT_CAM_INFO_SLOWEST };
+u8 textCamInfoSlow[] = { TEXT_CAM_INFO_SLOW };
+u8 textCamInfoMedium[] = { TEXT_CAM_INFO_MEDIUM };
+u8 textCamInfoFast[] = { TEXT_CAM_INFO_FAST};
+u8 textCamInfoFastest[] = { TEXT_CAM_INFO_FASTEST };
+
 extern u8 gLastCompletedCourseNum;
 extern u8 gLastCompletedStarNum;
 
@@ -2109,6 +2115,45 @@ void reset_red_coins_collected(void) {
     gRedCoinsCollected = 0;
 }
 
+void render_camera_speed_setting(void) {
+    gSPDisplayList(gDisplayListHead++, dl_ia_text_begin);
+    gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, gDialogTextAlpha);
+    switch (gCameraSpeed) {
+        case 0:
+            print_generic_string(190, 20, textCamInfoSlowest);
+            break;
+        case 1:
+            print_generic_string(190, 20, textCamInfoSlow);
+            break;
+        case 2:
+            print_generic_string(190, 20, textCamInfoMedium);
+            break;
+        case 3:
+            print_generic_string(190, 20, textCamInfoFast);
+            break;
+        case 4:
+            print_generic_string(190, 20, textCamInfoFastest);
+            break;
+    }
+    gSPDisplayList(gDisplayListHead++, dl_ia_text_end);
+
+    if (gPlayer1Controller->buttonPressed & R_JPAD) {
+        if (gCameraSpeed < 4) {
+            gCameraSpeed += 1;
+        } else {
+            gCameraSpeed = 0;
+        }
+        save_file_set_camera_speed(gCameraSpeed);
+    } else if (gPlayer1Controller->buttonPressed & L_JPAD) {
+        if (gCameraSpeed > 0) {
+            gCameraSpeed -= 1;
+        } else {
+            gCameraSpeed = 4;
+        }
+        save_file_set_camera_speed(gCameraSpeed);
+    }
+}
+
 void change_dialog_camera_angle(void) {
     if (cam_select_alt_mode(0) == CAM_SELECTION_MARIO) {
         gDialogCameraAngleIndex = CAM_SELECTION_MARIO;
@@ -2675,6 +2720,7 @@ s16 render_pause_courses_and_castle(void) {
             break;
     }
 
+	render_camera_speed_setting();
     if (gDialogTextAlpha < 250) {
         gDialogTextAlpha += 25;
     }
