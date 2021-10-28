@@ -15,6 +15,10 @@ this is based on ultrasm64 with some custom changes and patches from other proje
 - Automatic console and emulator detection: Use the `gIsConsole` variable to wrap your code in an emulator check.
 - Separate defines for emulator and console black border height.
 - Getting HVQM FMV support to work with the game is WIP.
+- odyssey and sunshine movement
+- reonucam3
+~ disabled aa
+- and minor options like to disable texture filtering, enable debug level select, skip peach
 
 ## Additional Prerequisites
 
