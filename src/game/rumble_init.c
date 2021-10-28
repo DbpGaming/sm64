@@ -19,8 +19,8 @@ OSMesgQueue gRumblePakSchedulerMesgQueue;
 OSMesg gRumbleThreadVIMesgBuf[1];
 OSMesgQueue gRumbleThreadVIMesgQueue;
 
-struct RumbleData gRumbleDataQueue[3];
-struct StructSH8031D9B0 gCurrRumbleSettings;
+volatile struct RumbleData gRumbleDataQueue[3];
+volatile struct StructSH8031D9B0 gCurrRumbleSettings;
 
 s32 sRumblePakThreadActive = FALSE;
 s32 sRumblePakActive = FALSE;

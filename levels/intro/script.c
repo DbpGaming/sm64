@@ -18,6 +18,8 @@
 #include "make_const_nonconst.h"
 #include "levels/intro/header.h"
 
+#include <config.h>
+
 const LevelScript level_intro_splash_screen[] = {
     INIT_LEVEL(),
     FIXED_LOAD(/*loadAddr*/ _goddardSegmentStart, /*romStart*/ _goddardSegmentRomStart, /*romEnd*/ _goddardSegmentRomEnd),
@@ -45,6 +47,9 @@ const LevelScript level_intro_splash_screen[] = {
 
 const LevelScript level_intro_mario_head_regular[] = {
     INIT_LEVEL(),
+#ifndef DEBUG_LEVEL_SELECT
+    EXIT_AND_EXECUTE(/*seg*/ 0x14, _menuSegmentRomStart, _menuSegmentRomEnd, level_main_menu_entry_1),
+#endif
     BLACKOUT(/*active*/ TRUE),
     FIXED_LOAD(/*loadAddr*/ _goddardSegmentStart, /*romStart*/ _goddardSegmentRomStart, /*romEnd*/ _goddardSegmentRomEnd),
     LOAD_RAW(/*seg*/ 0x13, _behaviorSegmentRomStart, _behaviorSegmentRomEnd),

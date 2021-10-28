@@ -52,7 +52,12 @@ $(eval $(call validate-option,LIBGCCDIR,trap divbreak nocheck))
 
 DEFINES += NO_ERRNO_H=1 NO_GZIP=1
 
-COMPRESS ?= gzip
+ifeq ($(COMPILER),gcc)
+	COMPRESS ?= gzip
+else ifeq ($(COMPILER),clang)
+	COMPRESS ?= rnc1
+endif
+
 $(eval $(call validate-option,COMPRESS,mio0 yay0 gzip rnc1 rnc2 uncomp))
 ifeq ($(COMPRESS),gzip)
   DEFINES += GZIP=1
@@ -120,7 +125,7 @@ endif
 ifeq ($(COMPILER),gcc)
   NON_MATCHING := 1
   MIPSISET     := -mips3
-  OPT_FLAGS    := -Ofast
+  OPT_FLAGS    := -Os
 else ifeq ($(COMPILER),clang)
   NON_MATCHING := 1
   # clang doesn't support ABI 'o32' for 'mips3'
@@ -442,6 +447,8 @@ all: $(ROM)
 	@$(PRINT) "==== Build Options ====$(NO_COL)\n"
 	@$(PRINT) "${GREEN}Version:        $(BLUE)$(VERSION)$(NO_COL)\n"
 	@$(PRINT) "${GREEN}Microcode:      $(BLUE)$(GRUCODE)$(NO_COL)\n"
+	@$(PRINT) "${GREEN}Compiler:       $(BLUE)$(COMPILER)$(NO_COL)\n"
+	@$(PRINT) "${GREEN}Optimization:   $(BLUE)$(OPT_FLAGS)$(NO_COL)\n"
 	@$(PRINT) "${GREEN}Console:        $(BLUE)$(CONSOLE)$(NO_COL)\n"
 	@$(PRINT) "${GREEN}Compression:    $(BLUE)$(COMPRESS)$(NO_COL)\n"
 

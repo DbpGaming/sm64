@@ -3,14 +3,14 @@
 
 #include "config.h"
 
-struct RumbleData {
+volatile struct RumbleData {
     u8 unk00;
     u8 unk01;
     s16 unk02;
     s16 unk04;
 };
 
-struct StructSH8031D9B0 {
+volatile struct StructSH8031D9B0 {
     s16 unk00;
     s16 unk02;
     s16 unk04;
@@ -53,8 +53,8 @@ extern OSMesgQueue gSIEventMesgQueue;
 extern OSMesg gRumblePakSchedulerMesgBuf[1];
 extern OSMesg gRumbleThreadVIMesgBuf[1];
 
-extern struct RumbleData gRumbleDataQueue[3];
-extern struct StructSH8031D9B0 gCurrRumbleSettings;
+extern volatile struct RumbleData gRumbleDataQueue[3];
+extern volatile struct StructSH8031D9B0 gCurrRumbleSettings;
 #endif
 
 extern struct VblankHandler *gVblankHandler1;
