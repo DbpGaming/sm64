@@ -52,7 +52,7 @@
 
 // Border Height Define for NTSC Versions
 #ifdef TARGET_N64
-#define BORDER_HEIGHT_CONSOLE 8
+#define BORDER_HEIGHT_CONSOLE 30
 #define BORDER_HEIGHT_EMULATOR 0
 #else
 #define BORDER_HEIGHT_CONSOLE 0
@@ -72,9 +72,13 @@
 #define NON_STOP
 
 //coin star
-#define COIN_STAR
+#define COIN_STAR 100
 
 // animated red coin hud
 // #define ANIMATED_RED_COIN_HUD
+
+//hud defines
+#define HUD_TOP_Y 210-BORDER_HEIGHT_CONSOLE
+#define HUD_BOTTOM_Y 16+BORDER_HEIGHT_CONSOLE
 
 #endif // CONFIG_H

@@ -245,12 +245,6 @@ void render_hud_power_meter(void) {
     sPowerMeterVisibleTimer++;
 }
 
-#ifdef VERSION_JP
-#define HUD_TOP_Y 210
-#else
-#define HUD_TOP_Y 209
-#endif
-
 /**
  * Renders the amount of coins collected.
  */

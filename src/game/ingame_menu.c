@@ -829,7 +829,7 @@ void print_hud_my_score_stars(s8 fileNum, s8 courseNum, s16 x, s16 y) {
     UNUSED u16 unused;
     u8 textSymX[] = { GLYPH_MULTIPLY, GLYPH_SPACE };
 
-    starCount = save_file_get_course_star_count(fileIndex, courseIndex);
+    starCount = save_file_get_course_star_count(fileNum, courseNum);
 
     if (starCount != 0) {
         print_hud_lut_string(HUD_LUT_GLOBAL, x, y, textSymStar);
@@ -2459,11 +2459,6 @@ void render_pause_castle_course_stars(s16 x, s16 y, s16 fileIndex, s16 courseInd
 
     u16 nextStar = 0;
 
-    if (starFlags & (1 << 6)) {
-        starCount--;
-        print_generic_string(x + 89, y - 5, textStar);
-    }
-
     while (hasStar != starCount) {
         if (starFlags & (1 << nextStar)) {
             str[nextStar * 2] = DIALOG_CHAR_STAR_FILLED;
@@ -2476,7 +2471,7 @@ void render_pause_castle_course_stars(s16 x, s16 y, s16 fileIndex, s16 courseInd
         nextStar++;
     }
 
-    if (starCount == nextStar && starCount != 6) {
+    if (starCount == nextStar) {
         str[nextStar * 2] = DIALOG_CHAR_STAR_OPEN;
         str[nextStar * 2 + 1] = DIALOG_CHAR_SPACE;
         nextStar++;
@@ -2484,7 +2479,7 @@ void render_pause_castle_course_stars(s16 x, s16 y, s16 fileIndex, s16 courseInd
 
     str[nextStar * 2] = DIALOG_CHAR_TERMINATOR;
 
-    print_generic_string(x + 14, y + 13, str);
+    print_generic_string(x, y + 13, str);
 }
 
 void render_pause_castle_main_strings(s16 x, s16 y) {
@@ -2492,13 +2487,6 @@ void render_pause_castle_main_strings(s16 x, s16 y) {
     void **courseNameTbl;
 #else
     void **courseNameTbl = segmented_to_virtual(seg2_course_name_table);
-#endif
-
-#ifdef VERSION_EU
-    u8 textCoin[] = { TEXT_COIN };
-    u8 textX[] = { TEXT_VARIABLE_X };
-#else
-    u8 textCoin[] = { TEXT_COIN_X };
 #endif
 
     void *courseName;
@@ -2555,11 +2543,6 @@ void render_pause_castle_main_strings(s16 x, s16 y) {
     if (gDialogLineNum <= COURSE_NUM_TO_INDEX(COURSE_STAGES_MAX)) { // Main courses
         courseName = segmented_to_virtual(courseNameTbl[gDialogLineNum]);
         render_pause_castle_course_stars(x, y, gCurrSaveFileNum - 1, gDialogLineNum);
-        print_generic_string(x + 34, y - 5, textCoin);
-#ifdef VERSION_EU
-        print_generic_string(x + 44, y - 5, textX);
-#endif
-        print_generic_string(x + 54, y - 5, strVal);
 #ifdef VERSION_EU
         print_generic_string(x - 17, y + 30, courseName);
 #endif
