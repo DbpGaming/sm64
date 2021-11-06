@@ -6,6 +6,7 @@
 #include "surface_collision.h"
 
 #include "trig_tables.inc.c"
+#include "game/puppyprint.h"
 
 // Variables for a spline curve animation (used for the flight path in the grand star cutscene)
 Vec4s *gSplineKeyframe;

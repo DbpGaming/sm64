@@ -2,7 +2,6 @@
 #include <PR/os_internal_error.h>
 #include <stdarg.h>
 #include <string.h>
-
 #include "sm64.h"
 
 #include "printf.h"

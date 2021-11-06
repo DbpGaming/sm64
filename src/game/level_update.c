@@ -28,6 +28,7 @@
 #include "level_table.h"
 #include "course_table.h"
 #include "rumble_init.h"
+#include "puppyprint.h"
 
 #define PLAY_MODE_NORMAL 0
 #define PLAY_MODE_PAUSED 2
@@ -1141,6 +1142,9 @@ s32 update_level(void) {
 
 s32 init_level(void) {
     s32 val4 = FALSE;
+#if PUPPYPRINT_DEBUG
+    OSTime first = osGetTime();
+#endif
 
     set_play_mode(PLAY_MODE_NORMAL);
 
@@ -1210,6 +1214,13 @@ s32 init_level(void) {
         sound_banks_disable(SEQ_PLAYER_SFX, SOUND_BANKS_DISABLED_DURING_INTRO_CUTSCENE);
     }
 
+#if PUPPYPRINT_DEBUG
+#ifdef PUPPYPRINT_DEBUG_CYCLES
+    append_puppyprint_log("Level loaded in %dc", (s32)(osGetTime() - first));
+#else
+    append_puppyprint_log("Level loaded in %dus", (s32)(OS_CYCLES_TO_USEC(osGetTime() - first)));
+#endif
+#endif
     return 1;
 }
 

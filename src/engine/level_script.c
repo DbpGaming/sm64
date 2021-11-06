@@ -23,6 +23,7 @@
 #include "math_util.h"
 #include "surface_collision.h"
 #include "surface_load.h"
+#include "game/puppyprint.h"
 
 #define CMD_GET(type, offset) (*(type *) (CMD_PROCESS_OFFSET(offset) + (u8 *) sCurrentCmd))
 

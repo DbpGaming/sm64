@@ -81,4 +81,9 @@
 #define HUD_TOP_Y 210-BORDER_HEIGHT_CONSOLE
 #define HUD_BOTTOM_Y 16+BORDER_HEIGHT_CONSOLE
 
+#define PUPPYPRINT
+#define PUPPYPRINT_DEBUG 1
+// Use cycles instead of microseconds
+//#define PUPPYPRINT_DEBUG_CYCLES
+
 #endif // CONFIG_H
