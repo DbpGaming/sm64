@@ -28,6 +28,7 @@
 #include "level_table.h"
 #include "course_table.h"
 #include "rumble_init.h"
+#include "puppyprint.h"
 
 #define PLAY_MODE_NORMAL 0
 #define PLAY_MODE_PAUSED 2
@@ -94,13 +95,13 @@ const char *credits08[] = { "3COURSE DESIGNERS", "YOSHIKI HARUHANA", "MAKOTO MIY
 #ifdef VERSION_US
 const char *credits09[] = { "1SOUND COMPOSER", "KOJI KONDO" };
 // ...as well as sound effects and sound programmer in order to make room for screen text writer, Mario voice, and Peach voice
-const char *credits10[] = { "4SOUND EFFECTS", "SOUND PROGRAMMER", "YOJI INAGAKI", "HIDEAKI SHIMIZU" }; 
+const char *credits10[] = { "4SOUND EFFECTS", "SOUND PROGRAMMER", "YOJI INAGAKI", "HIDEAKI SHIMIZU" };
 const char *credits11[] = { "23-D ANIMATORS", "YOSHIAKI KOIZUMI", "SATORU TAKIZAWA" };
 const char *credits12[] = { "1ADDITIONAL GRAPHICS", "MASANAO ARIMOTO" };
 const char *credits13[] = { "3TECHNICAL SUPPORT", "TAKAO SAWANO", "HIROHITO YOSHIMOTO", "HIROTO YADA" };
 const char *credits14[] = { "1TECHNICAL SUPPORT", "SGI N64 PROJECT STAFF" };
 const char *credits15[] = { "2PROGRESS MANAGEMENT", "KIMIYOSHI FUKUI", "KEIZO KATO" };
-const char *credits16[] = { "5SCREEN TEXT WRITER", "TRANSLATION", "LESLIE SWAN", "MINA AKINO", "HIRO YAMADA" }; 
+const char *credits16[] = { "5SCREEN TEXT WRITER", "TRANSLATION", "LESLIE SWAN", "MINA AKINO", "HIRO YAMADA" };
 #else // VERSION_EU
 // ...as well as sound composer, sound effects, and sound programmer, and...
 const char *credits09[] = { "7SOUND COMPOSER", "SOUND EFFECTS", "SOUND PROGRAMMER", "KOJI KONDO", "YOJI INAGAKI", "HIDEAKI SHIMIZU" };
@@ -1160,6 +1161,9 @@ s32 update_level(void) {
 
 s32 init_level(void) {
     s32 val4 = FALSE;
+#if PUPPYPRINT_DEBUG
+    OSTime first = osGetTime();
+#endif
 
     set_play_mode(PLAY_MODE_NORMAL);
 
@@ -1224,6 +1228,13 @@ s32 init_level(void) {
         sound_banks_disable(SEQ_PLAYER_SFX, SOUND_BANKS_DISABLED_DURING_INTRO_CUTSCENE);
     }
 
+#if PUPPYPRINT_DEBUG
+#ifdef PUPPYPRINT_DEBUG_CYCLES
+    append_puppyprint_log("Level loaded in %dc", (s32)(osGetTime() - first));
+#else
+    append_puppyprint_log("Level loaded in %dus", (s32)(OS_CYCLES_TO_USEC(osGetTime() - first)));
+#endif
+#endif
     return 1;
 }
 

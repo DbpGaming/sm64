@@ -10,6 +10,7 @@
 #include "rendering_graph_node.h"
 #include "shadow.h"
 #include "sm64.h"
+#include "puppyprint.h"
 
 /**
  * This file contains the code that processes the scene graph for rendering.
@@ -1108,7 +1109,9 @@ void geo_process_node_and_siblings(struct GraphNode *firstNode) {
  */
 void geo_process_root(struct GraphNodeRoot *node, Vp *b, Vp *c, s32 clearColor) {
     UNUSED u8 filler[4];
-
+#if PUPPYPRINT_DEBUG
+    OSTime first = osGetTime();
+#endif
     if (node->node.flags & GRAPH_RENDER_ACTIVE) {
         Mtx *initialMatrix;
         Vp *viewport = alloc_display_list(sizeof(*viewport));
@@ -1148,4 +1151,7 @@ void geo_process_root(struct GraphNodeRoot *node, Vp *b, Vp *c, s32 clearColor) 
         }
         main_pool_free(gDisplayListHeap);
     }
+    #if PUPPYPRINT_DEBUG
+    profiler_update(graphTime, first);
+    #endif
 }

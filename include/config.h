@@ -57,4 +57,9 @@
 #define BORDER_HEIGHT_EMULATOR 0
 #endif
 
+#define PUPPYPRINT
+#define PUPPYPRINT_DEBUG 1
+// Use cycles instead of microseconds
+//#define PUPPYPRINT_DEBUG_CYCLES
+
 #endif // CONFIG_H

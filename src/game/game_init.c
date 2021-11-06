@@ -25,6 +25,7 @@
 #ifdef SRAM
 #include "sram.h"
 #endif
+#include "puppyprint.h"
 #include <prevent_bss_reordering.h>
 
 // First 3 controller slots
@@ -282,7 +283,7 @@ void create_gfx_task_structure(void) {
     gGfxSPTask->task.t.ucode_data = gspF3DEX_fifoDataStart;
 #elif   SUPER3D_GBI
     gGfxSPTask->task.t.ucode = gspSuper3D_fifoTextStart;
-    gGfxSPTask->task.t.ucode_data = gspSuper3D_fifoDataStart; 
+    gGfxSPTask->task.t.ucode_data = gspSuper3D_fifoDataStart;
 #else
     gGfxSPTask->task.t.ucode = gspFast3D_fifoTextStart;
     gGfxSPTask->task.t.ucode_data = gspFast3D_fifoDataStart;
@@ -366,7 +367,7 @@ void render_init(void) {
     } else {
         gIsConsole = 1;
         gBorderHeight = BORDER_HEIGHT_CONSOLE;
-    }    
+    }
     gGfxPool = &gGfxPools[0];
     set_segment_base_addr(1, gGfxPool->buffer);
     gGfxSPTask = &gGfxPool->spTask;
@@ -687,6 +688,9 @@ void setup_game_memory(void) {
  */
 void thread5_game_loop(UNUSED void *arg) {
     struct LevelCommand *addr;
+#if PUPPYPRINT_DEBUG
+    OSTime lastTime = 0;
+#endif
 
     setup_game_memory();
 #if ENABLE_RUMBLE
@@ -717,6 +721,13 @@ void thread5_game_loop(UNUSED void *arg) {
             continue;
         }
         profiler_log_thread5_time(THREAD5_START);
+	#if PUPPYPRINT_DEBUG
+        while (TRUE) {
+            lastTime = osGetTime();
+            collisionTime[perfIteration] = 0;
+            behaviourTime[perfIteration] = 0;
+            dmaTime[perfIteration] = 0;
+#endif
 
         // If any controllers are plugged in, start read the data for when
         // read_controller_inputs is called later.
@@ -731,7 +742,21 @@ void thread5_game_loop(UNUSED void *arg) {
         select_gfx_pool();
         read_controller_inputs();
         addr = level_script_execute(addr);
-
+#if PUPPYPRINT_DEBUG
+        profiler_update(scriptTime, lastTime);
+            if (benchmarkLoop > 0 && benchOption == 0) {
+                benchmarkLoop--;
+                benchMark[benchmarkLoop] = osGetTime() - lastTime;
+                if (benchmarkLoop == 0) {
+                    puppyprint_profiler_finished();
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        puppyprint_profiler_process();
+#endif
         display_and_vsync();
 
         // when debug info is enabled, print the "BUF %d" information.
