@@ -837,30 +837,30 @@ void geo_process_shadow(struct GraphNodeShadow *node) {
             shadowScale = (node->shadowScale * gCurGraphNodeObject->scale[0]);
         }
 
-        if (gCurrAnimEnabled) {
-            if ((gCurrAnimType == ANIM_TYPE_TRANSLATION)
-             || (gCurrAnimType == ANIM_TYPE_LATERAL_TRANSLATION)) {
-                struct GraphNode *geo = node->node.children;
-                f32 objScale = 1.0f;
-                if ((geo != NULL) && (geo->type == GRAPH_NODE_TYPE_SCALE)) {
-                    objScale = ((struct GraphNodeScale *) geo)->scale;
-                }
-                f32 animScale = (gCurrAnimTranslationMultiplier * objScale);
-                Vec3f animOffset;
-                animOffset[0] = (gCurrAnimData[retrieve_animation_index(gCurrAnimFrame, &gCurrAnimAttribute)] * animScale);
-                animOffset[1] = 0.0f;
-                gCurrAnimAttribute += 2;
-                animOffset[2] = (gCurrAnimData[retrieve_animation_index(gCurrAnimFrame, &gCurrAnimAttribute)] * animScale);
-                gCurrAnimAttribute -= 6;
-
-                // simple matrix rotation so the shadow offset rotates along with the object
-                f32 sinAng = sins(gCurGraphNodeObject->angle[1]);
-                f32 cosAng = coss(gCurGraphNodeObject->angle[1]);
-
-                shadowPos[0] += (( animOffset[0] * cosAng) + (animOffset[2] * sinAng));
-                shadowPos[2] += ((-animOffset[0] * sinAng) + (animOffset[2] * cosAng));
+        if (gCurrAnimEnabled
+         && ((gCurrAnimType == ANIM_TYPE_TRANSLATION)
+          || (gCurrAnimType == ANIM_TYPE_LATERAL_TRANSLATION))) {
+            struct GraphNode *geo = node->node.children;
+            f32 objScale = 1.0f;
+            if ((geo != NULL) && (geo->type == GRAPH_NODE_TYPE_SCALE)) {
+                objScale = ((struct GraphNodeScale *) geo)->scale;
             }
+            f32 animScale = (gCurrAnimTranslationMultiplier * objScale);
+            Vec3f animOffset;
+            animOffset[0] = (gCurrAnimData[retrieve_animation_index(gCurrAnimFrame, &gCurrAnimAttribute)] * animScale);
+            animOffset[1] = 0.0f;
+            gCurrAnimAttribute += 2;
+            animOffset[2] = (gCurrAnimData[retrieve_animation_index(gCurrAnimFrame, &gCurrAnimAttribute)] * animScale);
+            gCurrAnimAttribute -= 6;
+
+            // simple matrix rotation so the shadow offset rotates along with the object
+            f32 sinAng = sins(gCurGraphNodeObject->angle[1]);
+            f32 cosAng = coss(gCurGraphNodeObject->angle[1]);
+
+            shadowPos[0] += (( animOffset[0] * cosAng) + (animOffset[2] * sinAng));
+            shadowPos[2] += ((-animOffset[0] * sinAng) + (animOffset[2] * cosAng));
         }
+
         Gfx *shadowList = create_shadow_below_xyz(shadowPos, shadowScale, node->shadowSolidity, node->shadowType);
 
         if (shadowList != NULL) {
@@ -915,19 +915,6 @@ s32 obj_is_in_view(struct GraphNodeObject *node, Mat4 matrix) {
 
     struct GraphNode *geo = node->sharedChild;
 
-    // half of the fov in in-game angle units instead of degrees
-    s16 halfFov = ((((((gCurGraphNodeCamFrustum->fov * sAspectRatio) / 2.0f) + 1.0f) * 32768.0f) / 180.0f) + 0.5f);
-
-    f32 hScreenEdge = (-matrix[3][2] * tans(halfFov));
-    // -matrix[3][2] is the depth, which gets multiplied by tan(halfFov) to get
-    // the amount of units between the center of the screen and the horizontal edge
-    // given the distance from the object to the camera.
-
-    // This multiplication should really be performed on 4:3 as well,
-    // but the issue will be more apparent on widescreen.
-    // HackerSM64: This multiplication is done regardless of aspect ratio to fix object pop-in on the edges of the screen (which happens at 4:3 too)
-    // hScreenEdge *= GFX_DIMENSIONS_ASPECT_RATIO;
-
     s16 cullingRadius;
 
     if ((geo != NULL) && (geo->type == GRAPH_NODE_TYPE_CULLING_RADIUS)) {
@@ -948,6 +935,19 @@ s32 obj_is_in_view(struct GraphNodeObject *node, Mat4 matrix) {
     if (matrix[3][2] < (-20000.0f - cullingRadius)) {
         return FALSE;
     }
+
+    // half of the fov in in-game angle units instead of degrees
+    s16 halfFov = ((((((gCurGraphNodeCamFrustum->fov * sAspectRatio) / 2.0f) + 1.0f) * 32768.0f) / 180.0f) + 0.5f);
+
+    f32 hScreenEdge = (-matrix[3][2] * tans(halfFov));
+    // -matrix[3][2] is the depth, which gets multiplied by tan(halfFov) to get
+    // the amount of units between the center of the screen and the horizontal edge
+    // given the distance from the object to the camera.
+
+    // This multiplication should really be performed on 4:3 as well,
+    // but the issue will be more apparent on widescreen.
+    // HackerSM64: This multiplication is done regardless of aspect ratio to fix object pop-in on the edges of the screen (which happens at 4:3 too)
+    // hScreenEdge *= GFX_DIMENSIONS_ASPECT_RATIO;
 
     // Check whether the object is horizontally in view
     if (matrix[3][0] > ( hScreenEdge + cullingRadius)) return FALSE;

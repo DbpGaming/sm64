@@ -497,6 +497,8 @@ void vec3i_to_vec3f(Vec3f dest, const Vec3i src);
 void vec3f_to_vec3s(Vec3s dest, const Vec3f src);
 void vec3f_to_vec3i(Vec3i dest, const Vec3f src);
 
+void surface_normal_to_vec3f(Vec3f dest, struct Surface *surf);
+
 void vec3f_set(Vec3f dest, const f32 x, const f32 y, const f32 z);
 void vec3i_set(Vec3i dest, const s32 x, const s32 y, const s32 z);
 void vec3s_set(Vec3s dest, const s16 x, const s16 y, const s16 z);
@@ -550,6 +552,7 @@ inline void mtxf_to_mtx(register void *dest, register void *src) {
     guMtxF2L(src, dest);
 }
 void mtxf_rotate_xy(Mtx *mtx, s32 angle);
+void create_transformation_from_matrices(Mat4 dst, Mat4 a1, Mat4 a2);
 void get_pos_from_transform_mtx(Vec3f dest, Mat4 objMtx, Mat4 camMtx);
 
 void vec2f_get_lateral_dist(                   Vec2f from, Vec2f to,            f32 *lateralDist                            );
