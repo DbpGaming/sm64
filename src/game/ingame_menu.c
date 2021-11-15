@@ -26,6 +26,7 @@
 #include "config.h"
 #include "puppycam2.h"
 #include "main.h"
+#include "config.h"
 
 #ifdef VERSION_EU
 #undef LANGUAGE_FUNCTION
@@ -1530,7 +1531,7 @@ void render_pause_my_score_coins(void) {
     void    **actNameTbl = segmented_to_virtual(languageTable[gInGameLanguage][2]);
 
     u8 courseIndex = COURSE_NUM_TO_INDEX(gCurrCourseNum);
-    u8 starFlags = save_file_get_star_flags((gCurrSaveFileNum - 1), COURSE_NUM_TO_INDEX(gCurrCourseNum));
+    STAR_VALUE starFlags = save_file_get_star_flags((gCurrSaveFileNum - 1), COURSE_NUM_TO_INDEX(gCurrCourseNum));
 
     gSPDisplayList(gDisplayListHead++, dl_rgba16_text_begin);
     gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, gDialogTextAlpha);
@@ -1694,16 +1695,16 @@ void render_pause_castle_course_stars(s16 x, s16 y, s16 fileIndex, s16 courseInd
     u8 str[COURSE_STAGES_COUNT * 2];
 
     u8 textStar[] = { TEXT_STAR };
+    STAR_VALUE starFlags = save_file_get_star_flags(fileIndex, courseIndex);
+    STAR_VALUE starCount = save_file_get_course_star_count(fileIndex, courseIndex);
+    STAR_VALUE nextStar = 0;
 
-    u8 starFlags = save_file_get_star_flags(fileIndex, courseIndex);
-    u16 starCount = save_file_get_course_star_count(fileIndex, courseIndex);
-
-    u16 nextStar = 0;
-
+#ifndef COIN_STAR_ACT
     if (starFlags & STAR_FLAG_ACT_100_COINS) {
         starCount--;
         print_generic_string((x + 89), (y - 5), textStar);
     }
+#endif
 
     while (hasStar != starCount) {
         if (starFlags & (1 << nextStar)) {
@@ -1717,7 +1718,7 @@ void render_pause_castle_course_stars(s16 x, s16 y, s16 fileIndex, s16 courseInd
         nextStar++;
     }
 
-    if ((starCount == nextStar) && (starCount != 6)) {
+    if ((starCount == nextStar) && (starCount != STAR_COUNT-1))  {
         str[(nextStar * 2) + 0] = DIALOG_CHAR_STAR_OPEN;
         str[(nextStar * 2) + 1] = DIALOG_CHAR_SPACE;
         nextStar++;
@@ -1725,7 +1726,7 @@ void render_pause_castle_course_stars(s16 x, s16 y, s16 fileIndex, s16 courseInd
 
     str[nextStar * 2] = DIALOG_CHAR_TERMINATOR;
 
-    print_generic_string((x + 14), (y + 13), str);
+    print_generic_string(x, (y + 13), str);
 }
 
 void render_pause_castle_main_strings(s16 x, s16 y) {

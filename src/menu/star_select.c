@@ -20,6 +20,7 @@
 #include "star_select.h"
 #include "text_strings.h"
 #include "game/main.h"
+#include "config.h"
 
 /**
  * @file star_select.c
@@ -29,7 +30,7 @@
  */
 
 // Star Selector count models printed in the act selector menu.
-static struct Object *sStarSelectorModels[8];
+static struct Object *sStarSelectorModels[STAR_COUNT];
 
 // The act the course is loaded as, affects whether some objects spawn.
 static s8 sLoadedActNum;
@@ -76,9 +77,11 @@ void bhv_act_selector_star_type_loop(void) {
             o->oFaceAngleYaw += 0x800;
             break;
         // If the 100 coin star is selected, rotate
+#ifndef COIN_STAR_ACT
         case STAR_SELECTOR_100_COINS:
             o->oFaceAngleYaw += 0x800;
             break;
+#endif
     }
     // Scale act selector stars depending of the type selected
     cur_obj_scale(o->oStarSelectorSize);
@@ -89,26 +92,28 @@ void bhv_act_selector_star_type_loop(void) {
 /**
  * Renders the 100 coin star with an special star selector type.
  */
-void render_100_coin_star(u8 stars) {
+#ifndef COIN_STAR_ACT
+void render_100_coin_star(STAR_VALUE stars) {
     if (stars & STAR_FLAG_ACT_100_COINS) {
         // If the 100 coin star has been collected, create a new star selector next to the coin score.
     #ifdef WIDE
         if (gConfig.widescreen) {
-            sStarSelectorModels[6] = spawn_object_abs_with_rot(o, 0, MODEL_STAR,
+            sStarSelectorModels[STAR_FLAG_ACT_100_COINS] = spawn_object_abs_with_rot(o, 0, MODEL_STAR,
                                                             bhvActSelectorStarType, ((370 * 4.0f) / 3), 24, -300, 0, 0, 0);
         } else {
-            sStarSelectorModels[6] = spawn_object_abs_with_rot(o, 0, MODEL_STAR,
+            sStarSelectorModels[STAR_FLAG_ACT_100_COINS] = spawn_object_abs_with_rot(o, 0, MODEL_STAR,
                                                             bhvActSelectorStarType, 370, 24, -300, 0, 0, 0);
         }
     #else
-        sStarSelectorModels[6] = spawn_object_abs_with_rot(o, 0, MODEL_STAR,
+        sStarSelectorModels[STAR_FLAG_ACT_100_COINS] = spawn_object_abs_with_rot(o, 0, MODEL_STAR,
                                                         bhvActSelectorStarType, 370, 24, -300, 0, 0, 0);
     #endif
 
-        sStarSelectorModels[6]->oStarSelectorSize = 0.8f;
-        sStarSelectorModels[6]->oStarSelectorType = STAR_SELECTOR_100_COINS;
+        sStarSelectorModels[STAR_FLAG_ACT_100_COINS]->oStarSelectorSize = 0.8f;
+        sStarSelectorModels[STAR_FLAG_ACT_100_COINS]->oStarSelectorType = STAR_SELECTOR_100_COINS;
     }
 }
+#endif
 
 /**
  * Act Selector Init Action
@@ -118,8 +123,10 @@ void render_100_coin_star(u8 stars) {
  */
 void bhv_act_selector_init(void) {
     s16 i = 0;
-    s32 selectorModelIDs[10];
-    u8 stars = save_file_get_star_flags((gCurrSaveFileNum - 1), COURSE_NUM_TO_INDEX(gCurrCourseNum));
+	u8 i2 = 0;
+	u8 rowSize = 0;
+    s32 selectorModelIDs[STAR_COUNT];
+    STAR_VALUE stars = save_file_get_star_flags((gCurrSaveFileNum - 1), COURSE_NUM_TO_INDEX(gCurrCourseNum));
 
     sVisibleStars = 0;
     while (i != sObtainedStars) {
@@ -139,7 +146,7 @@ void bhv_act_selector_init(void) {
     }
 
     // If the stars have been collected in order so far, show the next star.
-    if ((sVisibleStars == sObtainedStars) && (sVisibleStars != 6)) {
+    if ((sVisibleStars == sObtainedStars) && (sVisibleStars != STAR_COUNT-1)) {
         selectorModelIDs[sVisibleStars] = MODEL_TRANSPARENT_STAR;
         sInitSelectedActNum  = (sVisibleStars + 1);
         sSelectableStarIndex = sVisibleStars;
@@ -147,7 +154,7 @@ void bhv_act_selector_init(void) {
     }
 
     // If all stars have been collected, set the default selection to the last star.
-    if (sObtainedStars == 6) {
+    if (sObtainedStars == STAR_COUNT-1) {
         sInitSelectedActNum = sVisibleStars;
     }
 
@@ -176,14 +183,25 @@ void bhv_act_selector_init(void) {
     }
 #else
     for (i = 0; i < sVisibleStars; i++) {
-        sStarSelectorModels[i] =
-            spawn_object_abs_with_rot(o, 0, selectorModelIDs[i], bhvActSelectorStarType,
-                                    (75 + (sVisibleStars * -75) + (i * 152)), 248, -300, 0, 0, 0);
+		for (i2 = 9; i2 > 2; i2--) {
+  			if ((sVisibleStars % i2) == 0) {
+    			rowSize = i2;
+    		break;
+  			}
+		}
+
+		if (i < rowSize){
+        	sStarSelectorModels[i] = spawn_object_abs_with_rot(o, 0, selectorModelIDs[i], bhvActSelectorStarType, (75 + (rowSize * -75) + (i * 152)), 496, -300, 0, 0, 0);
+		} else {
+	        sStarSelectorModels[i] = spawn_object_abs_with_rot(o, 0, selectorModelIDs[i], bhvActSelectorStarType, (75 + (rowSize * -75) + ((i - rowSize) * 152)), 248, -300, 0, 0, 0);
+		}
         sStarSelectorModels[i]->oStarSelectorSize = 1.0f;
     }
 #endif
 
+#ifndef COIN_STAR_ACT
     render_100_coin_star(stars);
+#endif
 }
 
 /**
@@ -196,9 +214,9 @@ void bhv_act_selector_init(void) {
 void bhv_act_selector_loop(void) {
     s8 i;
     u8 starIndexCounter;
-    u8 stars = save_file_get_star_flags((gCurrSaveFileNum - 1), COURSE_NUM_TO_INDEX(gCurrCourseNum));
+    STAR_VALUE stars = save_file_get_star_flags((gCurrSaveFileNum - 1), COURSE_NUM_TO_INDEX(gCurrCourseNum));
 
-    if (sObtainedStars != 6) {
+    if (sObtainedStars != STAR_COUNT-1) {
         // Sometimes, stars are not selectable even if they appear on the screen.
         // This code filters selectable and non-selectable stars.
         sSelectedActIndex = 0;
@@ -403,7 +421,7 @@ Gfx *geo_act_selector_strings(s16 callContext, UNUSED struct GraphNode *node, UN
  * Also load how much stars a course has, without counting the 100 coin star.
  */
 s32 lvl_init_act_selector_values_and_stars(UNUSED s32 arg, UNUSED s32 unused) {
-    u8 stars = save_file_get_star_flags((gCurrSaveFileNum - 1), COURSE_NUM_TO_INDEX(gCurrCourseNum));
+    STAR_VALUE stars = save_file_get_star_flags((gCurrSaveFileNum - 1), COURSE_NUM_TO_INDEX(gCurrCourseNum));
 
     sLoadedActNum = 0;
     sInitSelectedActNum = 0;
@@ -412,10 +430,12 @@ s32 lvl_init_act_selector_values_and_stars(UNUSED s32 arg, UNUSED s32 unused) {
     sObtainedStars =
         save_file_get_course_star_count((gCurrSaveFileNum - 1), COURSE_NUM_TO_INDEX(gCurrCourseNum));
 
+#ifndef COIN_STAR_ACT
     // Don't count 100 coin star
     if (stars & STAR_FLAG_ACT_100_COINS) {
         sObtainedStars--;
     }
+#endif
 
     return 0;
 }

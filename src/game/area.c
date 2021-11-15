@@ -33,7 +33,7 @@ struct Area gAreaData[AREA_COUNT];
 struct WarpTransition gWarpTransition;
 
 s16 gCurrCourseNum;
-s16 gCurrActNum;
+s32 gCurrActNum;
 s16 gCurrAreaIndex;
 s16 gSavedCourseNum;
 s16 gMenuOptSelectIndex;

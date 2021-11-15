@@ -24,3 +24,4 @@
 #include "config/config_audio.h"
 #include "config/config_debug.h"
 #include "config/config_goddard.h"
+#include "config/config_star.h"

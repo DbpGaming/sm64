@@ -82,7 +82,17 @@ enum LevelActs {
     ACT_4 = (1 << 3),
     ACT_5 = (1 << 4),
     ACT_6 = (1 << 5),
-    ALL_ACTS = (ACT_1 | ACT_2 | ACT_3 | ACT_4 | ACT_5 | ACT_6)
+    ACT_7 = (1 << 6),
+    ACT_8 = (1 << 7),
+    ACT_9 = (1 << 8),
+    ACT_10 = (1 << 9),
+    ACT_11 = (1 << 10),
+    ACT_12 = (1 << 11),
+    ACT_13 = (1 << 12),
+    ACT_14 = (1 << 13),
+    ACT_15 = (1 << 14),
+    ACT_16 = (1 << 15),
+    ALL_ACTS = (ACT_1 | ACT_2 | ACT_3 | ACT_4 | ACT_5 | ACT_6 | ACT_7 | ACT_8 | ACT_9 | ACT_10 | ACT_11 | ACT_12 | ACT_13 | ACT_14 | ACT_15 | ACT_16)
 };
 
 enum LevelCommandEvalOperation {
@@ -351,7 +361,7 @@ enum GoddardScene {
     CMD_W(unk8)
 
 #define OBJECT_WITH_ACTS(model, posX, posY, posZ, angleX, angleY, angleZ, behParam, beh, acts) \
-    CMD_BBBB(LEVEL_CMD_PLACE_OBJECT, 0x1C, acts, 0x00), \
+    CMD_BBH(LEVEL_CMD_PLACE_OBJECT, 0x1C, acts), \
     CMD_HHHHHH(posX, posY, posZ, angleX, angleY, angleZ), \
     CMD_W(behParam), \
     CMD_PTR(beh), \

@@ -165,7 +165,7 @@ extern struct GraphNode *gGraphNodePointers[MODEL_ID_COUNT];
 extern struct Area gAreaData[];
 extern struct WarpTransition gWarpTransition;
 extern s16 gCurrCourseNum;
-extern s16 gCurrActNum;
+extern s32 gCurrActNum;
 extern s16 gCurrAreaIndex;
 extern s16 gSavedCourseNum;
 extern s16 gMenuOptSelectIndex;

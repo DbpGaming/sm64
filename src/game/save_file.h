@@ -6,6 +6,7 @@
 #include "types.h"
 #include "area.h"
 #include "puppycam2.h"
+#include "config.h"
 
 #include "course_table.h"
 
@@ -44,7 +45,7 @@ struct SaveFile {
     // Star flags for each course.
     // The most significant bit of the byte *following* each course is set if the
     // cannon is open.
-    u8 courseStars[COURSE_COUNT];
+	STAR_VALUE courseStars[COURSE_COUNT];
 
     u8 courseCoinScores[COURSE_STAGES_COUNT];
 
@@ -109,7 +110,7 @@ extern u8 gSpecialTripleJump;
 extern s8 gLevelToCourseNumTable[];
 
 enum CourseFlags {
-    COURSE_FLAG_CANNON_UNLOCKED      = (1 <<  7), /* 0x00000080 */
+    COURSE_FLAG_CANNON_UNLOCKED      = (1 <<  STAR_COUNT), /* 0x00000080 */
 };
 
 // game progress flags
@@ -150,7 +151,17 @@ enum StarFlags {
     STAR_FLAG_ACT_4         = (1 << 3), // 0x08
     STAR_FLAG_ACT_5         = (1 << 4), // 0x10
     STAR_FLAG_ACT_6         = (1 << 5), // 0x20
-    STAR_FLAG_ACT_100_COINS = (1 << 6), // 0x40
+	STAR_FLAG_ACT_7         = (1 << 6), // 0x40
+    STAR_FLAG_ACT_8         = (1 << 7),
+    STAR_FLAG_ACT_9         = (1 << 8),
+    STAR_FLAG_ACT_10        = (1 << 9),
+    STAR_FLAG_ACT_11        = (1 << 10),
+    STAR_FLAG_ACT_12        = (1 << 11),
+	STAR_FLAG_ACT_13        = (1 << 12),
+    STAR_FLAG_ACT_14        = (1 << 13),
+    STAR_FLAG_ACT_15        = (1 << 14),
+    STAR_FLAG_ACT_16        = (1 << 15),
+    STAR_FLAG_ACT_100_COINS = (1 << (STAR_COUNT-1)),
     STAR_FLAG_LAST          = STAR_FLAG_ACT_100_COINS
 };
 
