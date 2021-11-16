@@ -13,6 +13,7 @@
 #include "mario_step.h"
 #include "save_file.h"
 #include "rumble_init.h"
+#include "config.h"
 
 void play_flip_sounds(struct MarioState *m, s16 frame1, s16 frame2, s16 frame3) {
     s32 animFrame = m->marioObj->header.gfx.animInfo.animFrame;
@@ -669,9 +670,11 @@ s32 act_long_jump(struct MarioState *m) {
         m->actionState = 1;
     }
 
+#ifdef LONG_JUMP_GROUND_POUND
     if (m->input & INPUT_Z_PRESSED) {
         return set_mario_action(m, ACT_GROUND_POUND, 0);
     }
+#endif
 
     common_air_action_step(m, ACT_LONG_JUMP_LAND, animation, AIR_STEP_CHECK_LEDGE_GRAB);
 #if ENABLE_RUMBLE
@@ -985,11 +988,13 @@ s32 act_ground_pound(struct MarioState *m) {
             m->actionState = 1;
         }
 
+#ifdef GROUND_POUND_DIVE
         if (m->input & INPUT_B_PRESSED) {
             mario_set_forward_vel(m, 10.0f);
             m->vel[1] = 35;
             set_mario_action(m, ACT_DIVE, 0);
         }
+#endif
     } else {
         set_mario_animation(m, MARIO_ANIM_GROUND_POUND);
 
@@ -1023,11 +1028,13 @@ s32 act_ground_pound(struct MarioState *m) {
             m->particleFlags |= PARTICLE_VERTICAL_STAR;
             set_mario_action(m, ACT_BACKWARD_AIR_KB, 0);
         } else {
+#ifdef GROUND_POUND_DIVE
             if (m->input & INPUT_B_PRESSED) {
                 mario_set_forward_vel(m, 10.0f);
                 m->vel[1] = 35;
                 set_mario_action(m, ACT_DIVE, 0);
             }
+#endif
         }
     }
 
@@ -1375,8 +1382,20 @@ s32 act_air_hit_wall(struct MarioState *m) {
         m->particleFlags |= PARTICLE_VERTICAL_STAR;
         return set_mario_action(m, ACT_BACKWARD_AIR_KB, 0);
     } else {
+#ifdef WALL_SLIDE
         m->faceAngle[1] += 0x8000;
         return set_mario_action(m, ACT_WALL_SLIDE, 0);
+#else
+        m->wallKickTimer = 5;
+        if (m->vel[1] > 0.0f) {
+            m->vel[1] = 0.0f;
+        }
+
+        if (m->forwardVel > 8.0f) {
+            mario_set_forward_vel(m, -8.0f);
+        }
+        return set_mario_action(m, ACT_SOFT_BONK, 0);
+#endif
     }
 
     set_mario_animation(m, MARIO_ANIM_START_WALLKICK);
@@ -2265,11 +2284,13 @@ s32 act_spin_pound(struct MarioState *m) {
 
     set_mario_animation(m, MARIO_ANIM_TWIRL);
 
+#ifdef GROUND_POUND_DIVE
     if (m->input & INPUT_B_PRESSED) {
         mario_set_forward_vel(m, 10.0f);
         m->vel[1] = 35;
         set_mario_action(m, ACT_DIVE, 0);
     }
+#endif
 
     stepResult = perform_air_step(m, 0);
     if (stepResult == AIR_STEP_LANDED) {

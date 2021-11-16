@@ -57,4 +57,15 @@
 #define BORDER_HEIGHT_EMULATOR 0
 #endif
 
+//movement config
+#define SPIN_JUMP
+#define LONG_JUMP_GROUND_POUND
+#define GROUND_POUND_JUMP
+#define TRIPLE_JUMP_SPEED 10.0f
+#define GROUND_POUND_DIVE
+#define ROLL
+#define REDIVE
+#define SUNSHINE_MOVE //WIP
+#define WALL_SLIDE
+
 #endif // CONFIG_H

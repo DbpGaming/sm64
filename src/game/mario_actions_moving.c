@@ -147,15 +147,15 @@ void slide_bonk(struct MarioState *m, u32 fastAction, u32 slowAction) {
 s32 set_triple_jump_action(struct MarioState *m, UNUSED u32 action, UNUSED u32 actionArg) {
     if (m->flags & MARIO_WING_CAP) {
         return set_mario_action(m, ACT_FLYING_TRIPLE_JUMP, 0);
-    } else if (m->forwardVel > 10.0f) {
+    } else if (m->forwardVel > TRIPLE_JUMP_SPEED) {
         return set_mario_action(m, ACT_TRIPLE_JUMP, 0);
     } else {
+#ifdef SPIN_JUMP
         if (m->input & INPUT_ANALOG_SPIN) {
             return set_mario_action(m, ACT_SPIN_JUMP, 0);
         }
-        else {
-            return set_mario_action(m, ACT_JUMP, 0);
-        }
+#endif
+        return set_mario_action(m, ACT_JUMP, 0);
     }
 
     return FALSE;
@@ -478,7 +478,11 @@ void update_walking_speed(struct MarioState *m) {
     if (m->forwardVel <= 0.0f) {
         m->forwardVel += 1.1f;
     } else if (m->forwardVel <= targetSpeed) {
+#ifdef SUNSHINE_MOVE
+        m->forwardVel += 2.2f - m->forwardVel / 43.0f;
+#else
         m->forwardVel += 1.1f - m->forwardVel / 43.0f;
+#endif
     } else if (m->floor->normal.y >= 0.95f) {
         m->forwardVel -= decayFactor;
     } else {
@@ -1007,12 +1011,12 @@ s32 act_turning_around(struct MarioState *m) {
     }
 
     if (m->input & INPUT_A_PRESSED) {
+#ifdef SPIN_JUMP
         if (m->input & INPUT_ANALOG_SPIN) {
             return set_jumping_action(m, ACT_SPIN_JUMP, 0);
         }
-        else {
-            return set_jumping_action(m, ACT_SIDE_FLIP, 0);
-        }
+#endif
+        return set_jumping_action(m, ACT_SIDE_FLIP, 0);
     }
 
     if (m->input & INPUT_UNKNOWN_5) {
@@ -1063,12 +1067,12 @@ s32 act_finish_turning_around(struct MarioState *m) {
     }
 
     if (m->input & INPUT_A_PRESSED) {
+#ifdef SPIN_JUMP
         if (m->input & INPUT_ANALOG_SPIN) {
             return set_jumping_action(m, ACT_SPIN_JUMP, 0);
         }
-        else {
-            return set_jumping_action(m, ACT_SIDE_FLIP, 0);
-        }
+#endif
+        return set_jumping_action(m, ACT_SIDE_FLIP, 0);
     }
 
     update_walking_speed(m);
@@ -1518,14 +1522,22 @@ s32 act_crouch_slide(struct MarioState *m) {
     }
 
     if (m->input & INPUT_B_PRESSED) {
+#ifdef ROLL
         if (m->forwardVel >= 19.0f) {
+#else
+        if (m->forwardVel >= 10.0f) {
+#endif
             return set_mario_action(m, ACT_SLIDE_KICK, 0);
         } else {
+#ifdef ROLL
             m->vel[1] = 19.0f;
             mario_set_forward_vel(m, max(32, m->forwardVel));
             play_mario_sound(m, SOUND_ACTION_TERRAIN_JUMP, 0);
             play_sound(SOUND_ACTION_SPIN, m->marioObj->header.gfx.cameraToObject);
             return set_mario_action(m, ACT_ROLL_AIR, 0);
+#else
+            return set_mario_action(m, ACT_MOVE_PUNCHING, 0x0009);
+#endif
         }
     }
 
@@ -1677,7 +1689,11 @@ s32 act_hold_stomach_slide(struct MarioState *m) {
 }
 
 s32 act_dive_slide(struct MarioState *m) {
+#ifdef REDIVE
     if (!(m->input & INPUT_ABOVE_SLIDE) && (m->input & INPUT_A_PRESSED)) {
+#else
+    if (!(m->input & INPUT_ABOVE_SLIDE) && (m->input & INPUT_A_PRESSED | INPUT_B_PRESSED)) {
+#endif
 #if ENABLE_RUMBLE
         queue_rumble_data(5, 80);
 #endif
@@ -1688,14 +1704,18 @@ s32 act_dive_slide(struct MarioState *m) {
     play_mario_landing_sound_once(m, SOUND_ACTION_TERRAIN_BODY_HIT_GROUND);
 
     if (!(m->input & INPUT_ABOVE_SLIDE)) {
+#ifdef ROLL
         if (m->input & INPUT_Z_DOWN && m->actionTimer == 0) {
             return set_mario_action(m, ACT_ROLL, 1);
         }
-        else if (m->input & INPUT_B_PRESSED) {
+#endif
+#ifdef REDIVE
+        if (m->input & INPUT_B_PRESSED) {
             //dive hop
             m->vel[1] = 21.0f;
             return set_mario_action(m, ACT_DIVE, 1);
         }
+#endif
     }
 
     //! If the dive slide ends on the same frame that we pick up on object,
@@ -1991,10 +2011,12 @@ s32 act_long_jump_land(struct MarioState *m) {
     if (!(m->input & INPUT_Z_DOWN)) {
         m->input &= ~INPUT_A_PRESSED;
     }
+#ifdef ROLL
     else if (m->forwardVel > 15.0f && m->actionTimer == 0) {
         play_mario_landing_sound_once(m, SOUND_ACTION_TERRAIN_LANDING);
         return set_mario_action(m, ACT_ROLL, 1);
     }
+#endif
 
     if (common_landing_cancels(m, &sLongJumpLandAction, set_jumping_action)) {
         return TRUE;
